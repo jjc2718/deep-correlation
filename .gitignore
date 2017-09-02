@@ -1,0 +1,8 @@
+*.swo
+*.swp
+*.pyc
+__pycache__/
+
+data/images
+data/old_images
+keras_example

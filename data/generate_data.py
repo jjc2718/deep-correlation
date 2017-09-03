@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 SEED = 2
-NUM_IMAGES = 100
+NUM_IMAGES = 10000
 NUM_POINTS = 100
 
 def generate_corr_pts(num_points=NUM_POINTS, corr=0.8):

@@ -1,3 +1,4 @@
+import math
 import tensorflow as tf
 
 def build_model(image_data, image_size, hsize):
@@ -12,7 +13,7 @@ def build_model(image_data, image_size, hsize):
             tf.truncated_normal([image_size, hsize],
                                 stddev=1.0 / math.sqrt(float(image_size))),
                               name='weights')
-        biases = tf.Variable(tf.zeros([hidden1_units]),
+        biases = tf.Variable(tf.zeros([hsize]),
                              name='biases')
         hidden = tf.nn.relu(tf.matmul(image_data, weights) + biases)
 
@@ -21,7 +22,7 @@ def build_model(image_data, image_size, hsize):
             tf.truncated_normal([hsize, 1],
                                 stddev=1.0 / math.sqrt(float(image_size))),
                               name='weights')
-        biases = tf.Variable(tf.zeros([hidden1_units]),
+        biases = tf.Variable(tf.zeros([1]),
                              name='biases')
         output = tf.matmul(hidden, weights) + biases
 

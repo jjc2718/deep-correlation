@@ -28,7 +28,6 @@ def build_model(image_data, image_size, hsize):
 
     return output
 
-
 def loss(outputs, labels):
     """
     Args:

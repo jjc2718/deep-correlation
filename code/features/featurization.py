@@ -7,21 +7,46 @@ import numpy as np
 
 import config as cfg
 
-def get_images(images_dir, transform, flatten=False):
+def get_images(images_dir, transform, flatten=False, skip_cache=False):
     ''' Import and preprocess image data '''
     # intensity is all that matters; 1 = black, 0 = white
     # (this could probably just be binary 0/1 for each pixel, grey doesn't
     #  mean anything)
+
+    images_filename = cfg.get_image_data_filename(flatten=flatten)
+
+    if (not skip_cache) and os.path.isfile(images_filename):
+        cfg.v_print('Loading image data from cache file: {}'.format(
+                    images_filename))
+        X, y = get_image_data_from_cache(images_filename)
+
+    else:
+        cfg.v_print('Loading image data from directory: {}'.format(
+                    images_dir))
+        X, y = get_image_data_from_files(images_dir, transform,
+                                         flatten=flatten,
+                                         skip_cache=skip_cache)
+
+    cfg.v_print('Loaded {} images'.format(len(X)))
+
+    return X, y
+
+def get_image_data_from_cache(images_filename):
+    import pickle
+    with open(images_filename, 'rb') as f:
+        data = pickle.load(f)
+    X = data['X']
+    y = data['y']
+    return X, y
+
+def get_image_data_from_files(images_dir, transform, flatten=False,
+                              skip_cache=False):
     from PIL import Image
 
     X, y = [], []
-    cfg.v_print('Loading images')
     for ix, fname in enumerate(os.listdir(os.path.abspath(images_dir))):
         # skip hidden files
         if fname.startswith('.'): continue
-
-        # TODO: remove, for testing only
-        if ix > 100: break
 
         # get training correlation (target variable) from filename
         corr = float('.'.join(fname.split('_')[-1].split('.')[0:2]))
@@ -36,10 +61,14 @@ def get_images(images_dir, transform, flatten=False):
         im_array = transform(im_array)
         X.append(im_array)
 
-    cfg.v_print('Loaded {} images'.format(len(X)))
-
     X = np.array([np.array(r).flatten() for r in X]) if flatten else np.array(X)
     y = np.array(y)
+
+    if not skip_cache:
+        import pickle
+        images_filename = cfg.get_image_data_filename(flatten=flatten)
+        with open(images_filename, 'wb') as f:
+            pickle.dump({'X': X, 'y': y}, f)
 
     return X, y
 

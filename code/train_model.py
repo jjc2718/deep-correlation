@@ -23,6 +23,7 @@ def process_args():
                         default=cfg.default_learning_rate)
     parser.add_argument('-s', '--seed', type=int,
                         default=cfg.default_seed)
+    parser.add_argument('-sk', '--skip_cache', action='store_true')
     parser.add_argument('-ts', '--test_size',
                         default=cfg.default_test_size)
     parser.add_argument('-v', '--verbose', action='store_true')
@@ -76,7 +77,7 @@ def run_training(args, image_data, image_labels):
         }
         loss_value = sess.run([loss], feed_dict=feed)
 
-        cfg.v_print('\nValidation loss: {}\n'.format(loss_value))
+        cfg.v_print('\nValidation loss: {}\n'.format(loss_value[0]))
         time.sleep(2)
 
 def main():
@@ -90,7 +91,8 @@ def main():
     transform = np.vectorize(lambda x: (cfg.max_intensity - x) /
                                         cfg.max_intensity)
     image_data, image_labels = feat.get_images(args.images_dir, transform,
-                                               flatten=True)
+                                               flatten=True,
+                                               skip_cache=args.skip_cache)
 
     run_training(args, image_data, image_labels)
 

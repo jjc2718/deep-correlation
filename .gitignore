@@ -4,6 +4,7 @@
 __init__.py
 __pycache__/
 
+data/*.pkl
 data/images
 data/old_images
 keras_example

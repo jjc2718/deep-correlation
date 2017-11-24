@@ -5,7 +5,12 @@ repo_root = '..'
 data_dir = pj(repo_root, 'data')
 images_dir = pj(data_dir, 'images')
 
-default_batch_size = 10
+images_data = pj(data_dir, 'ims{}.pkl')
+
+def get_image_data_filename(flatten=False):
+    return images_data.format('_flat' if flatten else '')
+
+default_batch_size = 100
 default_epochs = 20
 default_hidden_size = 500
 default_learning_rate = 0.001

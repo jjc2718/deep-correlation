@@ -3,7 +3,8 @@ import os
 import numpy as np
 
 import config
-import models.model as model
+import models.mlp as model
+import features.featurization as feat
 
 def process_args():
     import argparse
@@ -25,36 +26,10 @@ def process_args():
                         default=config.default_test_size)
     return parser.parse_args()
 
-def get_images(images_dir, transform):
-    ''' Import and preprocess image data '''
-    from PIL import Image
+def run_training(args, image_data, image_labels):
 
-    X, y = [], []
-    v_print('Loading images')
-    for ix, fname in enumerate(os.listdir(os.path.abspath(images_dir))):
-        # skip hidden files
-        if fname.startswith('.'): continue
+    for X, y in feat. get_batches(image_data, image_labels, args.batch_size):
 
-        # TODO: remove, for testing only
-        if ix > 100: break
-
-        # get training correlation (target variable) from filename
-        corr = float('.'.join(fname.split('_')[-1].split('.')[0:2]))
-        y.append(corr)
-
-        # open and preprocess image, add to dataset
-        full_fname = os.path.join(os.path.abspath(images_dir), fname)
-        v_print('- Loading image: {}'.format(fname))
-
-        im = Image.open(full_fname).convert('LA')
-        im_array = np.array(im.getdata())[:,0].reshape(im.size[0], im.size[1])
-        im_array = transform(im_array)
-        X.append(im_array)
-
-    v_print('Loaded {} images'.format(len(X)))
-    return np.array(X), np.array(y)
-
-def run_training(image_data, image_labels):
     model.build_model(image_data, image_size, args.hsize)
 
 def main():
@@ -65,16 +40,12 @@ def main():
     global v_print
     v_print = _v_print
 
-    # preprocessing for images - intensity is all that matters;
-    # 1 = black, 0 = white
-    # (this could probably just be binary 0/1 for each pixel, grey doesn't
-    #  mean anything)
     transform = np.vectorize(lambda x: (config.max_intensity - x) /
                                         config.max_intensity)
-    image_data, image_labels = get_images(args.images_dir, transform)
+    image_data, image_labels = feat.get_images(args.images_dir, transform)
 
     # TODO: divide into batches
-    run_training(image_data, image_labels)
+    run_training(args, image_data, image_labels)
 
 
 if __name__ == '__main__':

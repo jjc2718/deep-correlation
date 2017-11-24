@@ -3,14 +3,13 @@ Generate labeled training data
 
 """
 import os
+import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 
-SEED = 2
-NUM_IMAGES = 10000
-NUM_POINTS = 100
+import config
 
-def generate_corr_pts(num_points=NUM_POINTS, corr=0.8):
+def generate_corr_pts(num_points, corr=0.8):
     x, y = np.array([0, 1]), np.array([0, 1])
     means = [x.mean(), y.mean()]
     stds = [x.std() / 3, y.std() / 3]
@@ -20,22 +19,21 @@ def generate_corr_pts(num_points=NUM_POINTS, corr=0.8):
     return m
 
 def main():
+    p = argparse.ArgumentParser()
+    p.add_argument('-n', '--num_images', type=int, default=10000)
+    p.add_argument('-p', '--num_points', type=int, default=100)
+    p.add_argument('-s', '--seed', type=int, default=1)
+    p.add_argument('-o', '--output_dir', default=config.default_images_dir)
+    args = p.parse_args()
 
-    np.random.seed(SEED)
+    np.random.seed(args.seed)
 
-    if not os.path.exists('./images'):
-        os.makedirs('./images')
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
 
-    for i in range(NUM_IMAGES):
+    for i in range(args.num_images):
         corr = np.random.randint(1, 100) * 0.01
-        pts = generate_corr_pts(corr=corr)
-        '''
-        fig, ax = plt.subplots()
-        ax.spines['right'].set_visible(False)
-        ax.spines['top'].set_visible(False)
-        ax.xaxis.set_ticks_position('bottom')
-        ax.yaxis.set_ticks_position('left')
-        '''
+        pts = generate_corr_pts(args.num_points, corr=corr)
         plt.figure(figsize=(10, 10), dpi=10)
         plt.scatter(*pts)
         plt.xlim([0, 1])

@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 import config
-import model
+import models.model as model
 
 def process_args():
     import argparse
@@ -30,9 +30,13 @@ def get_images(images_dir, transform):
     from PIL import Image
 
     X, y = [], []
-    for fname in os.listdir(os.path.abspath(images_dir)):
+    v_print('Loading images')
+    for ix, fname in enumerate(os.listdir(os.path.abspath(images_dir))):
         # skip hidden files
         if fname.startswith('.'): continue
+
+        # TODO: remove, for testing only
+        if ix > 100: break
 
         # get training correlation (target variable) from filename
         corr = float('.'.join(fname.split('_')[-1].split('.')[0:2]))
@@ -40,28 +44,39 @@ def get_images(images_dir, transform):
 
         # open and preprocess image, add to dataset
         full_fname = os.path.join(os.path.abspath(images_dir), fname)
+        v_print('- Loading image: {}'.format(fname))
+
         im = Image.open(full_fname).convert('LA')
         im_array = np.array(im.getdata())[:,0].reshape(im.size[0], im.size[1])
         im_array = transform(im_array)
         X.append(im_array)
 
+    v_print('Loaded {} images'.format(len(X)))
     return np.array(X), np.array(y)
+
+def run_training(image_data, image_labels):
+    model.build_model(image_data, image_size, args.hsize)
 
 def main():
     args = process_args()
+
+    # set up verbose printing if the arg is included
+    _v_print = print if args.verbose else lambda *a, **k: None
+    global v_print
+    v_print = _v_print
 
     # preprocessing for images - intensity is all that matters;
     # 1 = black, 0 = white
     # (this could probably just be binary 0/1 for each pixel, grey doesn't
     #  mean anything)
-    transform = np.vectorize(lambda x: (MAX_INTENSITY - x) / MAX_INTENSITY)
+    transform = np.vectorize(lambda x: (config.max_intensity - x) /
+                                        config.max_intensity)
     image_data, image_labels = get_images(args.images_dir, transform)
-    if args.verbose:
-        print('loaded images')
 
-    model.build_model(image_data, image
+    # TODO: divide into batches
+    run_training(image_data, image_labels)
 
 
 if __name__ == '__main__':
-    model.run_training()
+    main()
 

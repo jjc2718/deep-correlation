@@ -23,7 +23,6 @@ def build_model(image_data, image_size, hsize):
                               name='weights')
         biases = tf.Variable(tf.zeros([hidden1_units]),
                              name='biases')
-        # softmax here?
         output = tf.matmul(hidden, weights) + biases
 
     return output
@@ -48,7 +47,8 @@ def run_training(loss, lr):
     Returns: train_op
     """
     tf.summary.scalar('loss', loss)
-    optimizer = tf.train.GradientDescentOptimizer(lr)
+    # optimizer = tf.train.GradientDescentOptimizer(lr)
+    optimizer = tf.train.AdamOptimizer(lr)
     global_step = tf.Variable(0, name='global_step', trainable=False)
     train_op = optimizer.minimize(loss, global_step=global_step)
     return train_op

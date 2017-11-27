@@ -52,6 +52,7 @@ def run_training(args, image_data, image_labels):
     sess = tf.Session()
     sess.run(init)
 
+    v_loss = 0
     for epoch in range(1, args.num_epochs+1):
 
         for batch_no, (X_batch, y_batch) in enumerate(feat.get_batches(X_train,
@@ -77,7 +78,10 @@ def run_training(args, image_data, image_labels):
         }
         loss_value = sess.run([loss], feed_dict=feed)
 
-        cfg.v_print('\nValidation loss: {}\n'.format(loss_value[0]))
+        cfg.v_print('\nValidation loss: {} (last: {})\n'.format(
+            loss_value[0], (v_loss if v_loss != 0 else 'N/A')))
+        v_loss = loss_value[0]
+
         time.sleep(2)
 
 def main():

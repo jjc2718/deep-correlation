@@ -1,4 +1,6 @@
+from __future__ import print_function
 import os
+
 pj = os.path.join
 
 repo_root = '..'

@@ -72,6 +72,17 @@ def get_image_data_from_files(images_dir, transform, flatten=False,
 
     return X, y
 
+def get_image_patches(X, method='max', flatten=False):
+    from skimage.measure import block_reduce
+    reduce_func = (np.max if method == 'max' else np.mean)
+    patches = block_reduce(X, block_size=(1, 5, 5), func=reduce_func)
+    if flatten:
+        X_patches = np.reshape(patches, (patches.shape[0],
+                                         patches.shape[1] * patches.shape[2]))
+    else:
+        X_patches = patches
+    return X_patches
+
 def get_batches(X, y, batch_size):
     num_samples = X.shape[0]
     for i in range(0, num_samples, batch_size):

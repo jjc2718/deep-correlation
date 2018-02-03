@@ -21,6 +21,9 @@ def process_args():
                         default=cfg.images_dir)
     parser.add_argument('-lr', '--learning_rate', type=float,
                         default=cfg.default_learning_rate)
+    parser.add_argument('-p', '--patches', action='store_true',
+                        help='Preprocess image into patches (basically,\
+                              do max pooling before training)')
     parser.add_argument('-s', '--seed', type=int,
                         default=cfg.default_seed)
     parser.add_argument('-sk', '--skip_cache', action='store_true')
@@ -65,20 +68,30 @@ def run_training(args, image_data, image_labels):
             }
 
             _, loss_value = sess.run([train_op, loss], feed_dict=feed)
+
+            '''
             cfg.v_print('Epoch {} ({}/{}): train loss {}'.format(
                 epoch,
                 (num_images * (epoch - 1)) + (batch_no * args.batch_size),
                 num_images * args.num_epochs,
                 loss_value))
+            '''
 
-        feed = {
+        train_mse = sess.run([loss], feed_dict={
+            imdata: X_train,
+            labels: y_train
+        })
+
+        valid_mse = sess.run([loss], feed_dict={
             imdata: X_valid,
             labels: y_valid
-        }
-        loss_value = sess.run([loss], feed_dict=feed)
+        })
 
-        cfg.v_print('\nValidation loss: {}\n'.format(loss_value[0]))
-        time.sleep(2)
+        cfg.v_print('Train MSE: {}, validation MSE: {}'.format(
+            train_mse[0], valid_mse[0]))
+        if args.verbose:
+            time.sleep(1)
+
 
 def main():
     args = process_args()
@@ -90,9 +103,12 @@ def main():
 
     transform = np.vectorize(lambda x: (cfg.max_intensity - x) /
                                         cfg.max_intensity)
+
     image_data, image_labels = feat.get_images(args.images_dir, transform,
-                                               flatten=True,
+                                               flatten=(not args.patches),
                                                skip_cache=args.skip_cache)
+    if args.patches:
+        image_data = feat.get_image_patches(image_data, flatten=True)
 
     run_training(args, image_data, image_labels)
 

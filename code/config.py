@@ -4,7 +4,8 @@ import os
 pj = os.path.join
 
 repo_root = '..'
-data_dir = pj(repo_root, 'data')
+# data_dir = pj(repo_root, 'data')
+data_dir = '/data/jcrawf04/deep-correlation'
 images_dir = pj(data_dir, 'images')
 
 images_data = pj(data_dir, 'ims{}.pkl')

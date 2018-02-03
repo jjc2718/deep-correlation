@@ -55,6 +55,7 @@ def run_training(args, image_data, image_labels):
     sess = tf.Session()
     sess.run(init)
 
+    v_loss = 0
     for epoch in range(1, args.num_epochs+1):
 
         for batch_no, (X_batch, y_batch) in enumerate(feat.get_batches(X_train,

@@ -47,7 +47,6 @@ def run_training(loss, lr):
     Returns: train_op
     """
     tf.summary.scalar('loss', loss)
-    # optimizer = tf.train.GradientDescentOptimizer(lr)
     optimizer = tf.train.AdamOptimizer(lr)
     global_step = tf.Variable(0, name='global_step', trainable=False)
     train_op = optimizer.minimize(loss, global_step=global_step)
